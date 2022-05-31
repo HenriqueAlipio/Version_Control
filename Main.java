@@ -488,21 +488,21 @@ public class Main {
 			System.out.println(ALL_PROJECT_WITH_LEVEL + lowerLimit + AND + upperLimit + TWO_POINTS);
 			while (itProjects.hasNext()) {
 				Project project = itProjects.next();
-				String[] itKeywords =project.getKeyWords().split(BREAK);
-				String string = null;
-				boolean primeira = true;
+				String[] itKeywords = project.getKeyWords().split(BREAK);
+				String listOfKeywords = null;
+				boolean firstKeyword = true;
 				for (String keyword : itKeywords) {
-					if (primeira) {
-						string = (keyword);
-						primeira = false;
+					if (firstKeyword) {
+						listOfKeywords = keyword;
+						firstKeyword = false;
 					} else {
-						string = string.concat(", ");
-						string = string.concat(keyword);
+						listOfKeywords = listOfKeywords.concat(", ");
+						listOfKeywords = listOfKeywords.concat(keyword);
 
 					}
 				}
-				System.out.println(
-						project.getProjectName() + MANAGED_BY1 + project.getUsername() + HAS_KEYWORDS + string + DOT);
+				System.out.println(project.getProjectName() + MANAGED_BY1 + project.getUsername() + HAS_KEYWORDS
+						+ listOfKeywords + DOT);
 			}
 
 		} catch (
