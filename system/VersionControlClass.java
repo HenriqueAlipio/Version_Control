@@ -240,10 +240,27 @@ public class VersionControlClass implements VersionControl {
 		keywordProjects.addAll(keywordInHouse);
 		keywordProjects.addAll(keywordOutsourced);
 
-		if (keywordProjects.size() <= 0) {
+		if (keywordProjects.size() == 0) {
 			throw new NoProjectWithKeywordException();
 		}
 		return keywordProjects.iterator();
+	}
+
+	public Iterator<Project> listProjectsByConfidentiality(int limit1, int limit2) throws NoProjectsBetweenTheLimits {
+		Iterator<Project> itAllProjects = projects.values().iterator();
+		SortedSet<Project> confidentialityProjects = new TreeSet<Project>();
+		while (itAllProjects.hasNext()) {
+			Project project = itAllProjects.next();
+			if (project.getType().equals(IN_HOUSE))
+				if (project.getLevel() >= limit1 && project.getLevel() <= limit2) {
+					confidentialityProjects.add(project);
+				}
+		}
+
+		if (confidentialityProjects.size() == 0) {
+			throw new NoProjectsBetweenTheLimits();
+		}
+		return confidentialityProjects.iterator();
 	}
 
 }

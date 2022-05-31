@@ -77,6 +77,11 @@ public class Main {
 	private static final String NO_PROJECT_WITH_KEYWORD = "No projects with keyword ";
 	private static final String LIST_KEYWORD_PROJECTS = "All projects with keyword ";
 
+	private static final String NO_PROJECTS_WITHOUT_LEVEL = "No projects within levels ";
+	private static final String AND = " and ";
+	private static final String ALL_PROJECT_WITH_LEVEL = "All projects within levels ";
+	private static final String HAS_KEYWORDS = " and has keywords ";
+
 	private static final String MANAGER_INFO3 = "Manager ";
 	private static final String BREAK = " ";
 	private static final String DOT = ".";
@@ -90,7 +95,8 @@ public class Main {
 	 * Enumerado que define os comandos do utilizador
 	 */
 	private enum Command {
-		UNKNOWN, EXIT, HELP, REGISTER, USERS, CREATE, PROJECTS, TEAM, ARTEFACTS, PROJECT, REVISION, MANAGES, KEYWORD
+		UNKNOWN, EXIT, HELP, REGISTER, USERS, CREATE, PROJECTS, TEAM, ARTEFACTS, PROJECT, REVISION, MANAGES, KEYWORD,
+		CONFIDENTIALITY
 
 	}
 
@@ -148,6 +154,10 @@ public class Main {
 				break;
 			case KEYWORD:
 				listKeyword(input, vc);
+				break;
+			case CONFIDENTIALITY:
+				listByConfidentiality(input, vc);
+				break;
 			default:
 				break;
 			}
@@ -441,10 +451,10 @@ public class Main {
 		String keyword = input.nextLine().trim();
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern(WRITE_DATE_FORMAT);
 		try {
-			Iterator<Project> itProject = vc.listProjectsWithKeyword(keyword);
+			Iterator<Project> itProjects = vc.listProjectsWithKeyword(keyword);
 			System.out.println(LIST_KEYWORD_PROJECTS + keyword + TWO_POINTS);
-			while (itProject.hasNext()) {
-				Project project = itProject.next();
+			while (itProjects.hasNext()) {
+				Project project = itProjects.next();
 				if (project.getType().equals(IN_HOUSE_INFO1)) {
 					System.out.println(IN_HOUSE_INFO2 + project.getProjectName() + MANAGED_BY1 + project.getUsername()
 							+ SQUARE_BRACKETS1 + project.getLevel() + COMMA + project.getNrMembers() + COMMA
@@ -460,4 +470,45 @@ public class Main {
 		}
 	}
 
+	private static void listByConfidentiality(Scanner input, VersionControl vc) {
+		int limit1 = input.nextInt();
+		int limit2 = input.nextInt();
+		int lowerLimit = -1;
+		int upperLimit = -1;
+		if (limit1 <= limit2) {
+			lowerLimit = limit1;
+			upperLimit = limit2;
+		} else {
+			lowerLimit = limit2;
+			upperLimit = limit1;
+		}
+		try {
+			Iterator<Project> itProjects = vc.listProjectsByConfidentiality(lowerLimit, upperLimit);
+
+			System.out.println(ALL_PROJECT_WITH_LEVEL + lowerLimit + AND + upperLimit + TWO_POINTS);
+			while (itProjects.hasNext()) {
+				Project project = itProjects.next();
+				String[] itKeywords =project.getKeyWords().split(BREAK);
+				String string = null;
+				boolean primeira = true;
+				for (String keyword : itKeywords) {
+					if (primeira) {
+						string = (keyword);
+						primeira = false;
+					} else {
+						string = string.concat(", ");
+						string = string.concat(keyword);
+
+					}
+				}
+				System.out.println(
+						project.getProjectName() + MANAGED_BY1 + project.getUsername() + HAS_KEYWORDS + string + DOT);
+			}
+
+		} catch (
+
+		NoProjectsBetweenTheLimits e) {
+			System.out.println(NO_PROJECTS_WITHOUT_LEVEL + lowerLimit + AND + upperLimit + DOT);
+		}
+	}
 }

@@ -10,7 +10,7 @@ public class ProjectClass implements Project {
 	private Map<String, Artefact> artefacts;
 	private Set<Revision> revisions;
 
-	public ProjectClass( String projectType,String username, String projectName, int value, String keywords,
+	public ProjectClass(String projectType, String username, String projectName, int value, String keywords,
 			int confidentialityLevel, String companyName) {
 		this.username = username;
 		this.type = projectType;

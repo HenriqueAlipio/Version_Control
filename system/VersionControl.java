@@ -54,4 +54,6 @@ public interface VersionControl {
 
 	Iterator<Project> listProjectsWithKeyword(String keyword) throws NoProjectWithKeywordException;
 
+	Iterator<Project> listProjectsByConfidentiality(int limit1, int limit2)throws NoProjectsBetweenTheLimits;
+
 }
