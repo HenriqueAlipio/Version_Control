@@ -24,10 +24,17 @@ public interface User extends Comparable<User> {
 
 	int getNumProjDev();
 
+	int getNumUpdates();
+
+	LocalDate getLastUpdateDate();
+
 	Iterator<String> listDev();
 
-	void addRevision(String username, String projectName, String artefactName, LocalDate date, String comment,int revisionNumber);
+	void addRevision(String username, String projectName, String artefactName, LocalDate date, String comment,
+			int revisionNumber);
 
 	Iterator<Revision> listRevisions();
+
+	Iterator<String> listProjects();
 
 }

@@ -12,10 +12,12 @@ public class VersionControlClass implements VersionControl {
 
 	private SortedMap<String, User> users;
 	private Map<String, Project> projects;
+	private int maxCommon;
 
 	public VersionControlClass() {
 		this.users = new TreeMap<String, User>();
 		this.projects = new LinkedHashMap<String, Project>();
+		maxCommon = 0;
 	}
 
 	private boolean isManager(String job) {
@@ -126,6 +128,7 @@ public class VersionControlClass implements VersionControl {
 		}
 		getInfoOfUser(member).addProjectsDeveloper(projectName);
 		getInfoOfProject(projectName).addMembers(users.get(member));
+
 	}
 
 	public Artefact getInfoOfArtefact(String projectName, String artefactName) {
@@ -247,7 +250,8 @@ public class VersionControlClass implements VersionControl {
 	}
 
 	public Iterator<Project> listProjectsByConfidentiality(int limit1, int limit2) throws NoProjectsBetweenTheLimits {
-		Iterator<Project> itAllProjects = projects.values().iterator();
+		Iterator<Project> itAllProjects = projects.values().iterator(); // nao se pode usar o metodo porque nao tem se
+																		// essa exception
 		SortedSet<Project> confidentialityProjects = new TreeSet<Project>();
 		while (itAllProjects.hasNext()) {
 			Project project = itAllProjects.next();
@@ -261,6 +265,69 @@ public class VersionControlClass implements VersionControl {
 			throw new NoProjectsBetweenTheLimits();
 		}
 		return confidentialityProjects.iterator();
+	}
+
+	public Iterator<User> listWorkaholics() throws NoWorkaholicsException {
+		SortedSet<User> usersSorted = new TreeSet<User>(new ComparatorByUpdatesDateAndAlphabet());
+
+		usersSorted.addAll(users.values());
+
+		Set<User> workaholics = new LinkedHashSet<User>();
+		Iterator<User> itUsers = usersSorted.iterator();
+		int counter = 0;
+		while (itUsers.hasNext() && counter < 3) {
+			User user = itUsers.next();
+			workaholics.add(user);
+			counter++;
+		}
+		if (users.size() == 0 || workaholics.iterator().next().getNumUpdates() == 0) {
+			throw new NoWorkaholicsException();
+		}
+		return workaholics.iterator();
+
+	}
+
+	public Iterator<String> listCommonUser() throws NoCommonProjectsException {
+
+		SortedSet<String> commonUsers = new TreeSet<>();
+		int commonProjects = 0;
+		Iterator<User> itUsers1 = users.values().iterator();
+		Iterator<User> itUsers2 = users.values().iterator();
+		while (itUsers1.hasNext()) {
+			User user1 = itUsers1.next();
+			while (itUsers2.hasNext()) {
+				User user2 = itUsers2.next();
+				if (!user1.getUserName().equals(user2.getUserName())) {
+					Iterator<String> itProjetctsName1 = user1.listProjects();
+					Iterator<String> itProjetctsName2 = user2.listProjects();
+					while (itProjetctsName1.hasNext()) {
+						String projects1 = itProjetctsName1.next();
+						while (itProjetctsName2.hasNext()) {
+							String projects2 = itProjetctsName2.next();
+							if (projects1.equals(projects2)) {
+								commonProjects++;
+
+							}
+						}
+					}
+				}
+				if (commonProjects > maxCommon) {
+					maxCommon = commonProjects;
+					commonUsers.clear();
+					commonUsers.add(user1.getUserName());
+					commonUsers.add(user2.getUserName());
+				}
+			}
+		}
+		if (commonUsers.size() == 0) {
+			throw new NoCommonProjectsException();
+		}
+		return commonUsers.iterator();
+
+	}
+
+	public int maxNumberCommon() {
+		return maxCommon;
 	}
 
 }

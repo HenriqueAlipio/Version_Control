@@ -56,4 +56,9 @@ public interface VersionControl {
 
 	Iterator<Project> listProjectsByConfidentiality(int limit1, int limit2)throws NoProjectsBetweenTheLimits;
 
+	Iterator<User> listWorkaholics()throws NoWorkaholicsException;
+
+	Iterator<String> listCommonUser()throws NoCommonProjectsException;
+
+	int maxNumberCommon();
 }

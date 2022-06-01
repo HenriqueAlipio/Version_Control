@@ -96,7 +96,7 @@ public class Main {
 	 */
 	private enum Command {
 		UNKNOWN, EXIT, HELP, REGISTER, USERS, CREATE, PROJECTS, TEAM, ARTEFACTS, PROJECT, REVISION, MANAGES, KEYWORD,
-		CONFIDENTIALITY
+		CONFIDENTIALITY, WORKAHOLICS,COMMON
 
 	}
 
@@ -157,6 +157,12 @@ public class Main {
 				break;
 			case CONFIDENTIALITY:
 				listByConfidentiality(input, vc);
+				break;
+			case WORKAHOLICS:
+				listWorkaholics(vc);
+				break;
+			case COMMON:
+				listCommon(vc);
 				break;
 			default:
 				break;
@@ -509,6 +515,33 @@ public class Main {
 
 		NoProjectsBetweenTheLimits e) {
 			System.out.println(NO_PROJECTS_WITHOUT_LEVEL + lowerLimit + AND + upperLimit + DOT);
+		}
+	}
+
+	private static void listWorkaholics(VersionControl vc) {
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern(WRITE_DATE_FORMAT);
+		try {
+			Iterator<User> itUser = vc.listWorkaholics();
+			while (itUser.hasNext()) {
+				User user = itUser.next();
+				System.out.println(user.getUserName() + TWO_POINTS + BREAK + user.getNumUpdates() + " updates, "
+						+ user.getNumProjDev() + " projects, " + "last update on "
+						+ formatter.format(user.getLastUpdateDate()));
+			}
+		} catch (NoWorkaholicsException e) {
+			System.out.println("There are no workaholics.");
+		}
+	}
+
+	private static void listCommon(VersionControl vc) {
+		try {
+			
+			Iterator<String> itCommon=vc.listCommonUser();
+			String user1=itCommon.next();
+			String user2=itCommon.next();
+			System.out.println(user1 +user2+vc.maxNumberCommon());
+		}catch(NoCommonProjectsException e) {
+			System.out.println();
 		}
 	}
 }

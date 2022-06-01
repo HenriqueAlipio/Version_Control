@@ -6,18 +6,21 @@ import java.util.*;
 public class UserClass implements User {
 	private String job, username, managerName;
 	private int level;
-	private SortedSet<String> devNames, projectsNamesOfMan, projectsNamesOfDev;
-	private Set<Revision> revisions;
+	private LocalDate lastUpdateDate;
+	private SortedSet<String> devNames, projectsNamesOfMan, projectsNamesOfDev,projectsNames;
+	private Map<Integer,Revision> revisions;
 
 	public UserClass(String jobPosition, String username, String managerName, int level) {
 		this.job = jobPosition;
 		this.username = username;
 		this.managerName = managerName;
 		this.level = level;
-		devNames = new TreeSet<>();
-		projectsNamesOfMan = new TreeSet<>();
-		projectsNamesOfDev = new TreeSet<>();
-		revisions = new TreeSet<Revision>(new ComparatorByDateRevisionNumberAndName());
+		lastUpdateDate = LocalDate.MIN;
+		devNames = new TreeSet<String>();
+		projectsNamesOfMan = new TreeSet<String>();
+		projectsNamesOfDev = new TreeSet<String>();
+		projectsNames=new TreeSet<String>();
+		revisions = new TreeMap<Integer,Revision>();
 	}
 
 	public void addDev(String devName) {
@@ -26,10 +29,12 @@ public class UserClass implements User {
 
 	public void addProjectsManager(String projectName) {
 		projectsNamesOfMan.add(projectName);
+		projectsNames.add(projectName);
 	}
 
 	public void addProjectsDeveloper(String projectName) {
 		projectsNamesOfDev.add(projectName);
+		projectsNames.add(projectName);
 	}
 
 	public String getJob() {
@@ -60,6 +65,14 @@ public class UserClass implements User {
 		return projectsNamesOfDev.size() + projectsNamesOfMan.size();
 	}
 
+	public int getNumUpdates() {
+		return revisions.size();
+	}
+
+	public LocalDate getLastUpdateDate() {
+		return lastUpdateDate;
+	}
+
 	public int compareTo(User o) {
 		return this.getUserName().compareTo(o.getUserName());
 	}
@@ -71,11 +84,21 @@ public class UserClass implements User {
 	public void addRevision(String username, String projectName, String artefactName, LocalDate date, String comment,
 			int revisionNumber) {
 		Revision newRevision = new RevisionClass(username, projectName, artefactName, date, comment, revisionNumber);
-		revisions.add(newRevision);
+		revisions.put(revisions.size()+1,newRevision);
+		if (lastUpdateDate.isBefore(date)) {
+			lastUpdateDate = date;
+		}
 	}
 
 	public Iterator<Revision> listRevisions() {
-		return revisions.iterator();
+		SortedSet<Revision>revisionsSorted=new TreeSet<Revision>(new ComparatorByDateRevisionNumberAndName());
+		revisionsSorted.addAll(revisions.values());
+		return revisionsSorted.iterator();
 	}
+
+	public Iterator<String> listProjects() {
+		return projectsNames.iterator();
+	}
+	
 
 }
