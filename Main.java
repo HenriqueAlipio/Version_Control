@@ -535,7 +535,6 @@ public class Main {
 
 	private static void listCommon(VersionControl vc) {
 		try {
-			
 			Iterator<String> itCommon=vc.listCommonUser();
 			String user1=itCommon.next();
 			String user2=itCommon.next();
