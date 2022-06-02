@@ -2,6 +2,7 @@ package system;
 
 import java.time.LocalDate;
 import java.util.Iterator;
+import java.util.SortedSet;
 
 public interface User extends Comparable<User> {
 	String getUserName();
@@ -28,5 +29,6 @@ public interface User extends Comparable<User> {
 	Iterator<String> listProjects();
 
 	int getCommonProjects(User user2);
+	SortedSet<String> getSetProjects();
 
 }

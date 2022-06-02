@@ -17,7 +17,7 @@ public class VersionControlClass implements VersionControl {
 	public VersionControlClass() {
 		this.users = new TreeMap<String, User>();
 		this.projects = new LinkedHashMap<String, Project>();
-		maxCommon = 0;
+		this.maxCommon = 0;
 	}
 
 	private boolean isManager(String job) {
@@ -316,31 +316,39 @@ public class VersionControlClass implements VersionControl {
 
 	public Iterator<String> listCommonUser() throws NoCommonProjectsException {
 		int common = 0;
-		SortedSet<String> commonUsers = new TreeSet<>();
-		Iterator<User> itUsers1 = users.values().iterator();
-		Iterator<User> itUsers2 = users.values().iterator();
-		while (itUsers1.hasNext()) {
-			User user1 = itUsers1.next();
-			while (itUsers2.hasNext()) {
-				User user2 = itUsers2.next();
-				if (!user1.getUserName().equals(user2.getUserName())) {
-					common = user1.getCommonProjects(user2);
-				}
-
+		Set<SortedSet<String>> commonUsers = new HashSet<SortedSet<String>>();
+		SortedSet<String> lista = new TreeSet<String>();
+		SortedSet<String> lista2 = new TreeSet<String>();
+		ArrayList<User> usersInfo = new ArrayList<User>();
+		usersInfo.addAll(users.values());
+		for (int i = 0; i < usersInfo.size(); i++) {
+			User user1 = usersInfo.get(i);
+			for (int j = i + 1; j < usersInfo.size(); j++) {
+				User user2 = usersInfo.get(j);
+				common = user1.getCommonProjects(user2);
 				if (common > maxCommon) {
 					maxCommon = common;
 					commonUsers.clear();
-					commonUsers.add(user1.getUserName());
-					commonUsers.add(user2.getUserName());
+					lista.clear();
+					lista.add(user1.getUserName());
+					lista.add(user2.getUserName());
+					commonUsers.add(lista);
 				}
+				/*if (common == maxCommon && common != 0) {
+					lista2.add(user1.getUserName());
+					lista2.add(user2.getUserName());
+					commonUsers.add(lista2);
+					lista.clear();
+					lista2.clear();
+					lista=commonUsers.iterator().next();
+				}*/
 			}
-
 		}
-		if (commonUsers.size() == 0) {
+
+		if (lista.size() == 0) {
 			throw new NoCommonProjectsException();
 		}
-		return commonUsers.iterator();
-
+		return lista.iterator();
 	}
 
 	public int maxNumberCommon() {

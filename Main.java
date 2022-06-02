@@ -542,11 +542,11 @@ public class Main {
 	private static void listCommon(VersionControl vc) {
 		try {
 			Iterator<String> itCommon = vc.listCommonUser();
-			String user1 = itCommon.next();
-			String user2 = itCommon.next();
-			System.out.println(user1 + user2 + vc.maxNumberCommon());
+			String user1=itCommon.next();
+			String user2=itCommon.next();
+			System.out.println(user1 +" "+ user2+ " have " + vc.maxNumberCommon()+" projects in common.");
 		} catch (NoCommonProjectsException e) {
-			System.out.println();
+			System.out.println("Cannot determine employees with common projects.");
 		}
 	}
 }
