@@ -3,38 +3,22 @@ package system;
 import java.time.LocalDate;
 import java.util.*;
 
-public class UserClass implements User {
-	private String job, username, managerName;
+abstract class UserClass implements User {
+	private String job, username;
 	private int level;
 	private LocalDate lastUpdateDate;
-	private SortedSet<String> devNames, projectsNamesOfMan, projectsNamesOfDev,projectsNames;
-	private Map<Integer,Revision> revisions;
+	private SortedSet<String> projectsNames;
+	private SortedSet<String>  projectsNamesOfDev;
+	private Map<Integer, Revision> revisions;
 
-	public UserClass(String jobPosition, String username, String managerName, int level) {
+	public UserClass(String jobPosition, String username, int level) {
 		this.job = jobPosition;
 		this.username = username;
-		this.managerName = managerName;
 		this.level = level;
 		lastUpdateDate = LocalDate.MIN;
-		devNames = new TreeSet<String>();
-		projectsNamesOfMan = new TreeSet<String>();
+		projectsNames = new TreeSet<String>();
 		projectsNamesOfDev = new TreeSet<String>();
-		projectsNames=new TreeSet<String>();
-		revisions = new TreeMap<Integer,Revision>();
-	}
-
-	public void addDev(String devName) {
-		devNames.add(devName);
-	}
-
-	public void addProjectsManager(String projectName) {
-		projectsNamesOfMan.add(projectName);
-		projectsNames.add(projectName);
-	}
-
-	public void addProjectsDeveloper(String projectName) {
-		projectsNamesOfDev.add(projectName);
-		projectsNames.add(projectName);
+		revisions = new TreeMap<Integer, Revision>();
 	}
 
 	public String getJob() {
@@ -45,24 +29,19 @@ public class UserClass implements User {
 		return username;
 	}
 
-	public String getManagerName() {
-		return managerName;
-	}
-
 	public int getLevel() {
 		return level;
 	}
-
-	public int getNumDev() {
-		return devNames.size();
+	public void addProjectsDeveloper(String projectName) {
+		projectsNamesOfDev.add(projectName);
 	}
 
-	public int getNumProjMan() {
-		return projectsNamesOfMan.size();
+	public void addProject(String projectName) {
+		projectsNames.add(projectName);
 	}
 
 	public int getNumProjDev() { // projeto em que sao membros ou seja managers e/ou desenvolvidores
-		return projectsNamesOfDev.size() + projectsNamesOfMan.size();
+		return projectsNames.size();
 	}
 
 	public int getNumUpdates() {
@@ -77,21 +56,17 @@ public class UserClass implements User {
 		return this.getUserName().compareTo(o.getUserName());
 	}
 
-	public Iterator<String> listDev() {
-		return devNames.iterator();
-	}
-
 	public void addRevision(String username, String projectName, String artefactName, LocalDate date, String comment,
 			int revisionNumber) {
 		Revision newRevision = new RevisionClass(username, projectName, artefactName, date, comment, revisionNumber);
-		revisions.put(revisions.size()+1,newRevision);
+		revisions.put(revisions.size() + 1, newRevision);
 		if (lastUpdateDate.isBefore(date)) {
 			lastUpdateDate = date;
 		}
 	}
 
 	public Iterator<Revision> listRevisions() {
-		SortedSet<Revision>revisionsSorted=new TreeSet<Revision>(new ComparatorByDateRevisionNumberAndName());
+		SortedSet<Revision> revisionsSorted = new TreeSet<Revision>(new ComparatorByDateRevisionNumberAndName());
 		revisionsSorted.addAll(revisions.values());
 		return revisionsSorted.iterator();
 	}
@@ -99,6 +74,5 @@ public class UserClass implements User {
 	public Iterator<String> listProjects() {
 		return projectsNames.iterator();
 	}
-	
 
 }

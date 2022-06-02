@@ -8,19 +8,7 @@ public interface User extends Comparable<User> {
 
 	String getJob();
 
-	String getManagerName();
-
 	int getLevel();
-
-	void addDev(String devName);
-
-	void addProjectsManager(String projectName);
-
-	void addProjectsDeveloper(String projectName);
-
-	int getNumDev();
-
-	int getNumProjMan();
 
 	int getNumProjDev();
 
@@ -28,7 +16,9 @@ public interface User extends Comparable<User> {
 
 	LocalDate getLastUpdateDate();
 
-	Iterator<String> listDev();
+	void addProjectsDeveloper(String projectName);
+
+	void addProject(String projectName);
 
 	void addRevision(String username, String projectName, String artefactName, LocalDate date, String comment,
 			int revisionNumber);

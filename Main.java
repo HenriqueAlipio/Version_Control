@@ -205,15 +205,17 @@ public class Main {
 			Iterator<User> it = vc.listAllUsers();
 			System.out.println(LIST_USERS);
 			while (it.hasNext()) {
-				User userInfo = it.next();
+				User userInfo =(User) it.next();
 
-				if (userInfo.getJob().equals(MANAGER_INFO2)) {
+				if (userInfo instanceof Manager) {
+					Manager userInfo2=(Manager)userInfo;
 					System.out.println(MANAGER_INFO2 + BREAK + userInfo.getUserName() + SQUARE_BRACKETS1
-							+ userInfo.getNumDev() + COMMA + userInfo.getNumProjMan() + COMMA + userInfo.getNumProjDev()
+							+ userInfo2.getNumDev() + COMMA + userInfo2.getNumProjMan() + COMMA + userInfo.getNumProjDev()
 							+ SQUARE_BRACKETS2);
 				} else {
+					Developer userInfo3=(Developer)userInfo;
 					System.out.println(
-							DEVELOPER_INFO + BREAK + userInfo.getUserName() + MANAGED_BY1 + userInfo.getManagerName()
+							DEVELOPER_INFO + BREAK + userInfo.getUserName() + MANAGED_BY1 + userInfo3.getManagerName()
 									+ SQUARE_BRACKETS1 + userInfo.getNumProjDev() + SQUARE_BRACKETS2);
 				}
 

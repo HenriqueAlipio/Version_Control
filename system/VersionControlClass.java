@@ -28,6 +28,11 @@ public class VersionControlClass implements VersionControl {
 		return job.equals(DEVELOPER);
 	}
 
+	private Manager getInfoOfMan(String managerName) {
+		return (Manager) users.get(managerName);
+
+	}
+
 	public User getInfoOfUser(String user) {
 		return users.get(user);
 	}
@@ -43,14 +48,18 @@ public class VersionControlClass implements VersionControl {
 		}
 		if (isDeveloper(jobPosition)) {
 
-			if (!users.containsKey(managerName) || (!getInfoOfUser(managerName).getJob().equals(MANAGER))) {
+			if (!users.containsKey(managerName) || (getInfoOfUser(managerName) instanceof Developer)) {
 				throw new ManagerDoesNotExistException();
 			}
-			getInfoOfUser(managerName).addDev(username); // se um desenvolvidar tem manager adiciona o desenvolvidor ao
-															// manager
+
+			getInfoOfMan(managerName).addDevToManager(username); // se um desenvolvidar tem manager adiciona o desenvolvidor ao
+														// manager
+			Developer newUser = new DeveloperClass(jobPosition, username, managerName, level);
+			users.put(username, newUser);
+		} else {
+			Manager newUser = new ManagerClass(jobPosition, username, level);
+			users.put(username, newUser);
 		}
-		User newUser = new UserClass(jobPosition, username, managerName, level);
-		users.put(username, newUser);
 
 	}
 
@@ -79,7 +88,7 @@ public class VersionControlClass implements VersionControl {
 		if (!isInHouse(projectType) && !isOutsourced(projectType)) {
 			throw new UnknownProjectTypeException();
 		}
-		if (!users.containsKey(username) || !(getInfoOfUser(username).getJob().equals(MANAGER))) {
+		if (!users.containsKey(username) || (getInfoOfUser(username) instanceof Developer)) {
 			throw new ManagerDoesNotExistException();
 		}
 		if (projects.containsKey(projectName)) {
@@ -91,8 +100,8 @@ public class VersionControlClass implements VersionControl {
 		Project newProject = new ProjectClass(projectType, username, projectName, value, keywords, confidentialityLevel,
 				companyName);
 		projects.put(projectName, newProject);
-		getInfoOfUser(username).addProjectsManager(projectName);
-
+		getInfoOfMan(username).addProjectsManager(projectName);
+		getInfoOfUser(username).addProject(projectName);
 	}
 
 	public Iterator<Project> listAllProjects() throws NoProjectAddedException {
@@ -107,7 +116,7 @@ public class VersionControlClass implements VersionControl {
 		if (!projects.containsKey(projectName) || getInfoOfProject(projectName).getType().equals(OUTSOURCED)) {
 			throw new ProjectDoesNotExistException();
 		}
-		if (!users.containsKey(username) || !(getInfoOfUser(username).getJob().equals(MANAGER))) {
+		if (!users.containsKey(username) || (getInfoOfUser(username) instanceof Developer)) {
 			throw new ManagerDoesNotExistException();
 		}
 		if (!getInfoOfProject(projectName).getUsername().equals(username)) {
@@ -127,6 +136,7 @@ public class VersionControlClass implements VersionControl {
 			throw new InsuficientClarenceLevelException();
 		}
 		getInfoOfUser(member).addProjectsDeveloper(projectName);
+		getInfoOfUser(member).addProject(projectName);
 		getInfoOfProject(projectName).addMembers(users.get(member));
 
 	}
@@ -213,7 +223,7 @@ public class VersionControlClass implements VersionControl {
 		if (!users.containsKey(managerName) || !(getInfoOfUser(managerName).getJob().equals(MANAGER))) {
 			throw new ManagerDoesNotExistException();
 		}
-		return getInfoOfUser(managerName).listDev();
+		return getInfoOfMan(managerName).listDev();
 	}
 
 	public Iterator<Revision> listAllUserRevisions(String devName) {
