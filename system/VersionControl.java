@@ -16,6 +16,8 @@ public interface VersionControl {
 
 	User getInfoOfUser(String user);
 
+	InHouse getInfoOfProjectInHouse(String projectName);
+
 	Project getInfoOfProject(String projectName);
 
 	Iterator<User> listAllUsers() throws NoUserRegistedException;
@@ -54,11 +56,11 @@ public interface VersionControl {
 
 	Iterator<Project> listProjectsWithKeyword(String keyword) throws NoProjectWithKeywordException;
 
-	Iterator<Project> listProjectsByConfidentiality(int limit1, int limit2)throws NoProjectsBetweenTheLimits;
+	Iterator<Project> listProjectsByConfidentiality(int limit1, int limit2) throws NoProjectsBetweenTheLimits;
 
-	Iterator<User> listWorkaholics()throws NoWorkaholicsException;
+	Iterator<User> listWorkaholics() throws NoWorkaholicsException;
 
-	Iterator<String> listCommonUser()throws NoCommonProjectsException;
+	Iterator<String> listCommonUser() throws NoCommonProjectsException;
 
 	int maxNumberCommon();
 }

@@ -27,4 +27,6 @@ public interface User extends Comparable<User> {
 
 	Iterator<String> listProjects();
 
+	int getCommonProjects(User user2);
+
 }

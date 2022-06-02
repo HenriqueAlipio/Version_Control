@@ -52,8 +52,9 @@ public class VersionControlClass implements VersionControl {
 				throw new ManagerDoesNotExistException();
 			}
 
-			getInfoOfMan(managerName).addDevToManager(username); // se um desenvolvidar tem manager adiciona o desenvolvidor ao
-														// manager
+			getInfoOfMan(managerName).addDevToManager(username); // se um desenvolvidar tem manager adiciona o
+																	// desenvolvidor ao
+			// manager
 			Developer newUser = new DeveloperClass(jobPosition, username, managerName, level);
 			users.put(username, newUser);
 		} else {
@@ -78,6 +79,10 @@ public class VersionControlClass implements VersionControl {
 		return type.equals(OUTSOURCED);
 	}
 
+	public InHouse getInfoOfProjectInHouse(String projectName) {
+		return (InHouse) projects.get(projectName);
+	}
+
 	public Project getInfoOfProject(String projectName) {
 		return projects.get(projectName);
 	}
@@ -97,11 +102,20 @@ public class VersionControlClass implements VersionControl {
 		if (getInfoOfUser(username).getLevel() < confidentialityLevel && confidentialityLevel >= 0) {
 			throw new InadequateClearanceLevelException();
 		}
-		Project newProject = new ProjectClass(projectType, username, projectName, value, keywords, confidentialityLevel,
-				companyName);
-		projects.put(projectName, newProject);
-		getInfoOfMan(username).addProjectsManager(projectName);
-		getInfoOfUser(username).addProject(projectName);
+		if (isInHouse(projectType)) {
+			InHouse newProject = new InHouseClass(projectType, username, projectName, value, keywords,
+					confidentialityLevel);
+			projects.put(projectName, newProject);
+			getInfoOfMan(username).addProjectsManager(projectName);
+			getInfoOfUser(username).addProject(projectName);
+		} else {
+			OutSourced newProject = new OutSourcedClass(projectType, username, projectName, value, keywords,
+					companyName);
+			projects.put(projectName, newProject);
+			getInfoOfMan(username).addProjectsManager(projectName);
+			getInfoOfUser(username).addProject(projectName);
+
+		}
 	}
 
 	public Iterator<Project> listAllProjects() throws NoProjectAddedException {
@@ -113,10 +127,10 @@ public class VersionControlClass implements VersionControl {
 
 	public void teamExceptions(String username, String projectName)
 			throws ManagerDoesNotExistException, ProjectDoesNotExistException, ProjectIsNotManagedByUserException {
-		if (!projects.containsKey(projectName) || getInfoOfProject(projectName).getType().equals(OUTSOURCED)) {
+		if (!projects.containsKey(projectName) || getInfoOfProject(projectName) instanceof OutSourced) {
 			throw new ProjectDoesNotExistException();
 		}
-		if (!users.containsKey(username) || (getInfoOfUser(username) instanceof Developer)) {
+		if (!users.containsKey(username) || getInfoOfUser(username) instanceof Developer) {
 			throw new ManagerDoesNotExistException();
 		}
 		if (!getInfoOfProject(projectName).getUsername().equals(username)) {
@@ -129,20 +143,20 @@ public class VersionControlClass implements VersionControl {
 		if (!users.containsKey(member)) {
 			throw new UserDoesNotExistException();
 		}
-		if (getInfoOfProject(projectName).isAMember(users.get(member)) || username.equals(member)) {
+		if (getInfoOfProjectInHouse(projectName).isAMember(users.get(member)) || username.equals(member)) {
 			throw new UserAlreadyAMemberException();
 		}
-		if (getInfoOfUser(member).getLevel() < getInfoOfProject(projectName).getLevel()) {
+		if (getInfoOfUser(member).getLevel() < getInfoOfProjectInHouse(projectName).getLevel()) {
 			throw new InsuficientClarenceLevelException();
 		}
 		getInfoOfUser(member).addProjectsDeveloper(projectName);
 		getInfoOfUser(member).addProject(projectName);
-		getInfoOfProject(projectName).addMembers(users.get(member));
+		getInfoOfProjectInHouse(projectName).addMembers(users.get(member));
 
 	}
 
 	public Artefact getInfoOfArtefact(String projectName, String artefactName) {
-		return getInfoOfProject(projectName).getInfoOfArtefact(artefactName);
+		return getInfoOfProjectInHouse(projectName).getInfoOfArtefact(artefactName);
 	}
 
 	public void artefatcsExceptions(String username, String projectName)
@@ -150,10 +164,10 @@ public class VersionControlClass implements VersionControl {
 		if (!users.containsKey(username)) {
 			throw new UserDoesNotExistsException();
 		}
-		if (!projects.containsKey(projectName) || getInfoOfProject(projectName).getType().equals(OUTSOURCED)) {
+		if (!projects.containsKey(projectName) || getInfoOfProject(projectName) instanceof OutSourced) {
 			throw new ProjectDoesNotExistException();
 		}
-		if (!getInfoOfProject(projectName).isAMember(users.get(username))
+		if (!getInfoOfProjectInHouse(projectName).isAMember(users.get(username))
 				&& !getInfoOfProject(projectName).getUsername().equals(username)) {
 			throw new UserIsNotAMemberException();
 		}
@@ -161,14 +175,14 @@ public class VersionControlClass implements VersionControl {
 
 	public void addArtefacts(String username, String projectName, LocalDate realDate, String artefactName, int level,
 			String description) throws ExceedsClarenceLevelException, ArtefactAlreadyInProjectException {
-		if (getInfoOfProject(projectName).hasArtefact(artefactName)) {
+		if (getInfoOfProjectInHouse(projectName).hasArtefact(artefactName)) {
 			throw new ArtefactAlreadyInProjectException();
 		}
-		if (getInfoOfProject(projectName).getLevel() < level) {
+		if (getInfoOfProjectInHouse(projectName).getLevel() < level) {
 			throw new ExceedsClarenceLevelException();
 		}
 		Artefact newArtefact = new ArtefactClass(username, artefactName, level, description, realDate);
-		getInfoOfProject(projectName).addArtefact(newArtefact);
+		getInfoOfProjectInHouse(projectName).addArtefact(newArtefact);
 		getInfoOfArtefact(projectName, artefactName).addRevision(username, projectName, artefactName, realDate,
 				description);
 		getInfoOfUser(username).addRevision(username, projectName, artefactName, realDate, description, 1);
@@ -179,18 +193,18 @@ public class VersionControlClass implements VersionControl {
 		if (!projects.containsKey(projectName)) {
 			throw new ProjectDoesNotExistException();
 		}
-		if (getInfoOfProject(projectName).getType().equals(OUTSOURCED)) {
+		if (getInfoOfProject(projectName) instanceof OutSourced) {
 			throw new ProjectIsOutsourcedException();
 		}
 
 	}
 
 	public Iterator<User> listProjectMembers(String projectName) {
-		return getInfoOfProject(projectName).listMembers();
+		return getInfoOfProjectInHouse(projectName).listMembers();
 	}
 
 	public Iterator<Artefact> listProjectArtefacts(String projectName) {
-		return getInfoOfProject(projectName).listArtefacts();
+		return getInfoOfProjectInHouse(projectName).listArtefacts();
 	}
 
 	public Iterator<Revision> listArtefactRevision(Artefact artefact) {
@@ -203,24 +217,24 @@ public class VersionControlClass implements VersionControl {
 		if (!users.containsKey(username)) {
 			throw new UserDoesNotExistsException();
 		}
-		if (!projects.containsKey(projectName) || getInfoOfProject(projectName).getType().equals(OUTSOURCED)) {
+		if (!projects.containsKey(projectName) || getInfoOfProject(projectName) instanceof OutSourced) {
 			throw new ProjectDoesNotExistException();
 		}
-		if (!getInfoOfProject(projectName).hasArtefact(artefactName)) {
+		if (!getInfoOfProjectInHouse(projectName).hasArtefact(artefactName)) {
 			throw new ArtefactDoesNotExistInProjectException();
 		}
-		if (!getInfoOfProject(projectName).isAMember(users.get(username))
+		if (!getInfoOfProjectInHouse(projectName).isAMember(users.get(username))
 				&& !projects.get(projectName).getUsername().equals(username)) {
 			throw new UserIsNotAMemberException();
 		}
 		getInfoOfUser(username).addRevision(username, projectName, artefactName, date, comment,
 				getInfoOfArtefact(projectName, artefactName).getRevisionsNumberInArtefact() + 1);
-		getInfoOfProject(projectName).addRevision(username, projectName, artefactName, date, comment);
+		getInfoOfProjectInHouse(projectName).addRevision(username, projectName, artefactName, date, comment);
 		getInfoOfArtefact(projectName, artefactName).addRevision(username, projectName, artefactName, date, comment);
 	}
 
 	public Iterator<String> listDevOfMan(String managerName) throws ManagerDoesNotExistException {
-		if (!users.containsKey(managerName) || !(getInfoOfUser(managerName).getJob().equals(MANAGER))) {
+		if (!users.containsKey(managerName) || getInfoOfUser(managerName) instanceof Developer) {
 			throw new ManagerDoesNotExistException();
 		}
 		return getInfoOfMan(managerName).listDev();
@@ -233,7 +247,7 @@ public class VersionControlClass implements VersionControl {
 	public Iterator<Project> listProjectsWithKeyword(String keyword) throws NoProjectWithKeywordException {
 		Iterator<Project> itAllProjects = projects.values().iterator();
 
-		Set<Project> keywordInHouse = new TreeSet<Project>(new ComparatorByDateRevisionNumberAndProjectName()); // para
+		Set<InHouse> keywordInHouse = new TreeSet<InHouse>(new ComparatorByDateRevisionNumberAndProjectName()); // para
 																												// o
 																												// inhouse
 		SortedSet<Project> keywordOutsourced = new TreeSet<Project>(); // para o outsourced
@@ -242,8 +256,9 @@ public class VersionControlClass implements VersionControl {
 			Project project = itAllProjects.next();
 			if (project.getKeyWords().contains(keyword)) {
 
-				if (project.getType().equals(IN_HOUSE)) {
-					keywordInHouse.add(project);
+				if (project instanceof InHouse) {
+					InHouse projectInHouse = (InHouse) project;
+					keywordInHouse.add(projectInHouse);
 				} else {
 					keywordOutsourced.add(project);
 				}
@@ -265,12 +280,14 @@ public class VersionControlClass implements VersionControl {
 		SortedSet<Project> confidentialityProjects = new TreeSet<Project>();
 		while (itAllProjects.hasNext()) {
 			Project project = itAllProjects.next();
-			if (project.getType().equals(IN_HOUSE))
-				if (project.getLevel() >= limit1 && project.getLevel() <= limit2) {
+			if (project instanceof InHouse) {
+				InHouse inHouse = (InHouse) project;
+
+				if (inHouse.getLevel() >= limit1 && inHouse.getLevel() <= limit2) {
 					confidentialityProjects.add(project);
 				}
+			}
 		}
-
 		if (confidentialityProjects.size() == 0) {
 			throw new NoProjectsBetweenTheLimits();
 		}
@@ -298,9 +315,8 @@ public class VersionControlClass implements VersionControl {
 	}
 
 	public Iterator<String> listCommonUser() throws NoCommonProjectsException {
-
+		int common = 0;
 		SortedSet<String> commonUsers = new TreeSet<>();
-		int commonProjects = 0;
 		Iterator<User> itUsers1 = users.values().iterator();
 		Iterator<User> itUsers2 = users.values().iterator();
 		while (itUsers1.hasNext()) {
@@ -308,26 +324,17 @@ public class VersionControlClass implements VersionControl {
 			while (itUsers2.hasNext()) {
 				User user2 = itUsers2.next();
 				if (!user1.getUserName().equals(user2.getUserName())) {
-					Iterator<String> itProjetctsName1 = user1.listProjects();
-					Iterator<String> itProjetctsName2 = user2.listProjects();
-					while (itProjetctsName1.hasNext()) {
-						String projects1 = itProjetctsName1.next();
-						while (itProjetctsName2.hasNext()) {
-							String projects2 = itProjetctsName2.next();
-							if (projects1.equals(projects2)) {
-								commonProjects++;
-
-							}
-						}
-					}
+					common = user1.getCommonProjects(user2);
 				}
-				if (commonProjects > maxCommon) {
-					maxCommon = commonProjects;
+
+				if (common > maxCommon) {
+					maxCommon = common;
 					commonUsers.clear();
 					commonUsers.add(user1.getUserName());
 					commonUsers.add(user2.getUserName());
 				}
 			}
+
 		}
 		if (commonUsers.size() == 0) {
 			throw new NoCommonProjectsException();

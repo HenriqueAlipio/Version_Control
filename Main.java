@@ -96,7 +96,7 @@ public class Main {
 	 */
 	private enum Command {
 		UNKNOWN, EXIT, HELP, REGISTER, USERS, CREATE, PROJECTS, TEAM, ARTEFACTS, PROJECT, REVISION, MANAGES, KEYWORD,
-		CONFIDENTIALITY, WORKAHOLICS,COMMON
+		CONFIDENTIALITY, WORKAHOLICS, COMMON
 
 	}
 
@@ -205,15 +205,15 @@ public class Main {
 			Iterator<User> it = vc.listAllUsers();
 			System.out.println(LIST_USERS);
 			while (it.hasNext()) {
-				User userInfo =(User) it.next();
+				User userInfo = (User) it.next();
 
 				if (userInfo instanceof Manager) {
-					Manager userInfo2=(Manager)userInfo;
+					Manager userInfo2 = (Manager) userInfo;
 					System.out.println(MANAGER_INFO2 + BREAK + userInfo.getUserName() + SQUARE_BRACKETS1
-							+ userInfo2.getNumDev() + COMMA + userInfo2.getNumProjMan() + COMMA + userInfo.getNumProjDev()
-							+ SQUARE_BRACKETS2);
+							+ userInfo2.getNumDev() + COMMA + userInfo2.getNumProjMan() + COMMA
+							+ userInfo.getNumProjDev() + SQUARE_BRACKETS2);
 				} else {
-					Developer userInfo3=(Developer)userInfo;
+					Developer userInfo3 = (Developer) userInfo;
 					System.out.println(
 							DEVELOPER_INFO + BREAK + userInfo.getUserName() + MANAGED_BY1 + userInfo3.getManagerName()
 									+ SQUARE_BRACKETS1 + userInfo.getNumProjDev() + SQUARE_BRACKETS2);
@@ -260,15 +260,17 @@ public class Main {
 			while (it.hasNext()) {
 				Project projectInfo = it.next();
 
-				if (projectInfo.getType().equals(IN_HOUSE_INFO1)) {
+				if (projectInfo instanceof InHouse) {
+					InHouse inHouseInfo = (InHouse) projectInfo;
 					System.out.println(IN_HOUSE_INFO2 + projectInfo.getProjectName() + MANAGED_BY1
-							+ projectInfo.getUsername() + SQUARE_BRACKETS1 + projectInfo.getLevel() + COMMA
-							+ projectInfo.getNrMembers() + COMMA + projectInfo.getNrArtefacts() + COMMA
-							+ projectInfo.getNrRevisions() + SQUARE_BRACKETS2);
+							+ projectInfo.getUsername() + SQUARE_BRACKETS1 + inHouseInfo.getLevel() + COMMA
+							+ inHouseInfo.getNrMembers() + COMMA + inHouseInfo.getNrArtefacts() + COMMA
+							+ inHouseInfo.getNrRevisions() + SQUARE_BRACKETS2);
 
 				} else {
+					OutSourced outsourcedInfo = (OutSourced) projectInfo;
 					System.out.println(OUTSOURCED_INFO + BREAK + projectInfo.getProjectName() + MANAGED_BY1
-							+ projectInfo.getUsername() + DEV_BY + projectInfo.getCompanyName());
+							+ projectInfo.getUsername() + DEV_BY + outsourcedInfo.getCompanyName());
 
 				}
 			}
@@ -373,7 +375,7 @@ public class Main {
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern(WRITE_DATE_FORMAT);
 		try {
 			vc.projectDetailsExceptions(projectName); // ou no metodo listProjectMembers
-			System.out.println(projectName + SQUARE_BRACKETS1 + vc.getInfoOfProject(projectName).getLevel()
+			System.out.println(projectName + SQUARE_BRACKETS1 + vc.getInfoOfProjectInHouse(projectName).getLevel()
 					+ SQUARE_BRACKETS2 + MANAGED_BY2 + BREAK + vc.getInfoOfProject(projectName).getUsername()
 					+ SQUARE_BRACKETS1 + vc.getInfoOfUser(vc.getInfoOfProject(projectName).getUsername()).getLevel()
 					+ SQUARE_BRACKETS2 + TWO_POINTS);
@@ -463,14 +465,16 @@ public class Main {
 			System.out.println(LIST_KEYWORD_PROJECTS + keyword + TWO_POINTS);
 			while (itProjects.hasNext()) {
 				Project project = itProjects.next();
-				if (project.getType().equals(IN_HOUSE_INFO1)) {
+				if (project instanceof InHouse) {
+					InHouse inHouse = (InHouse) project;
 					System.out.println(IN_HOUSE_INFO2 + project.getProjectName() + MANAGED_BY1 + project.getUsername()
-							+ SQUARE_BRACKETS1 + project.getLevel() + COMMA + project.getNrMembers() + COMMA
-							+ project.getNrArtefacts() + COMMA + project.getNrRevisions() + COMMA
-							+ formatter.format(project.getLastRevision()) + SQUARE_BRACKETS2);
+							+ SQUARE_BRACKETS1 + inHouse.getLevel() + COMMA + inHouse.getNrMembers() + COMMA
+							+ inHouse.getNrArtefacts() + COMMA + inHouse.getNrRevisions() + COMMA
+							+ formatter.format(inHouse.getLastRevision()) + SQUARE_BRACKETS2);
 				} else {
+					OutSourced outSourced=(OutSourced) project;
 					System.out.println(OUTSOURCED_INFO + BREAK + project.getProjectName() + MANAGED_BY1
-							+ project.getUsername() + DEV_BY + project.getCompanyName());
+							+ project.getUsername() + DEV_BY + outSourced.getCompanyName());
 				}
 			}
 		} catch (NoProjectWithKeywordException e) {
@@ -537,11 +541,11 @@ public class Main {
 
 	private static void listCommon(VersionControl vc) {
 		try {
-			Iterator<String> itCommon=vc.listCommonUser();
-			String user1=itCommon.next();
-			String user2=itCommon.next();
-			System.out.println(user1 +user2+vc.maxNumberCommon());
-		}catch(NoCommonProjectsException e) {
+			Iterator<String> itCommon = vc.listCommonUser();
+			String user1 = itCommon.next();
+			String user2 = itCommon.next();
+			System.out.println(user1 + user2 + vc.maxNumberCommon());
+		} catch (NoCommonProjectsException e) {
 			System.out.println();
 		}
 	}

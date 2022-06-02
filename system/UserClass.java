@@ -8,7 +8,7 @@ abstract class UserClass implements User {
 	private int level;
 	private LocalDate lastUpdateDate;
 	private SortedSet<String> projectsNames;
-	private SortedSet<String>  projectsNamesOfDev;
+	private SortedSet<String> projectsNamesOfDev;
 	private Map<Integer, Revision> revisions;
 
 	public UserClass(String jobPosition, String username, int level) {
@@ -32,6 +32,7 @@ abstract class UserClass implements User {
 	public int getLevel() {
 		return level;
 	}
+
 	public void addProjectsDeveloper(String projectName) {
 		projectsNamesOfDev.add(projectName);
 	}
@@ -73,6 +74,26 @@ abstract class UserClass implements User {
 
 	public Iterator<String> listProjects() {
 		return projectsNames.iterator();
+	}
+
+	public int getCommonProjects(User user2) {
+		int common=0;
+		Iterator<String> itProjetctsName1 = this.listProjects();
+		Iterator<String> itProjetctsName2 = user2.listProjects();
+		while (itProjetctsName1.hasNext()) {
+			String projects1 = itProjetctsName1.next();
+			while (itProjetctsName2.hasNext()) {
+				String projects2 = itProjetctsName2.next();
+				if (projects1.equals(projects2)) {
+					common++;
+					System.out.println(common);
+				}
+				System.out.println(projects1);
+				System.out.println(projects2);
+			}
+
+		}
+		return common;
 	}
 
 }
