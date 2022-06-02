@@ -316,12 +316,12 @@ public class VersionControlClass implements VersionControl {
 
 	public Iterator<String> listCommonUser() throws NoCommonProjectsException {
 		int common = 0;
-		Set<SortedSet<String>> commonUsers = new HashSet<SortedSet<String>>();
+		SortedSet<SortedSet<String>> commonUsers = new TreeSet<SortedSet<String>>(new ComparatorByNames());
 		SortedSet<String> lista = new TreeSet<String>();
 		SortedSet<String> lista2 = new TreeSet<String>();
 		ArrayList<User> usersInfo = new ArrayList<User>();
 		usersInfo.addAll(users.values());
-		for (int i = 0; i < usersInfo.size(); i++) {
+		for (int i = 0; i < usersInfo.size() - 1; i++) {
 			User user1 = usersInfo.get(i);
 			for (int j = i + 1; j < usersInfo.size(); j++) {
 				User user2 = usersInfo.get(j);
@@ -334,21 +334,20 @@ public class VersionControlClass implements VersionControl {
 					lista.add(user2.getUserName());
 					commonUsers.add(lista);
 				}
-				/*if (common == maxCommon && common != 0) {
+				if (common == maxCommon && common != 0 && !lista.contains(user1.getUserName())
+						&& !lista.contains(user2.getUserName())) {
 					lista2.add(user1.getUserName());
 					lista2.add(user2.getUserName());
 					commonUsers.add(lista2);
-					lista.clear();
-					lista2.clear();
-					lista=commonUsers.iterator().next();
-				}*/
+					
+				}
 			}
 		}
 
-		if (lista.size() == 0) {
+		if (maxCommon == 0) {
 			throw new NoCommonProjectsException();
 		}
-		return lista.iterator();
+		return commonUsers.first().iterator();
 	}
 
 	public int maxNumberCommon() {
