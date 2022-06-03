@@ -41,7 +41,7 @@ abstract class UserClass implements User {
 		projectsNames.add(projectName);
 	}
 
-	public int getNumProjDev() { // projeto em que sao membros ou seja managers e/ou desenvolvidores
+	public int getNumProjDev() { 
 		return projectsNames.size();
 	}
 
@@ -53,9 +53,12 @@ abstract class UserClass implements User {
 		return lastUpdateDate;
 	}
 
-	public int compareTo(User o) {
-		return this.getUserName().compareTo(o.getUserName());
-	}
+	/**
+     * Returns the compared userName of two different users
+     */
+    public int compareTo(User o) {
+        return this.getUserName().compareTo(o.getUserName());
+    }
 
 	public void addRevision(String username, String projectName, String artefactName, LocalDate date, String comment,
 			int revisionNumber) {

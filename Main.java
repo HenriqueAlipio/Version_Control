@@ -4,7 +4,14 @@ import java.util.*;
 import system.*;
 import system.exceptions.*;
 
+/**
+ * Main program
+ * 
+ * @author Henrique Alípio 62829 | João Marques 62925
+ * 
+ */
 public class Main {
+	// Constants which are the feedback given by the program
 	private static final String UNKNOWNCOM = "Unknown command. Type help to see available commands.";
 
 	private static final String BYE = "Bye!";
@@ -92,7 +99,7 @@ public class Main {
 	private static final String WRITE_DATE_FORMAT = "dd-MM-yyyy";
 
 	/**
-	 * Enumerado que define os comandos do utilizador
+	 * Enum that defines user commands
 	 */
 	private enum Command {
 		UNKNOWN, EXIT, HELP, REGISTER, USERS, CREATE, PROJECTS, TEAM, ARTEFACTS, PROJECT, REVISION, MANAGES, KEYWORD,
@@ -100,11 +107,22 @@ public class Main {
 
 	}
 
+	/**
+	 * Calls the command interpreter
+	 * 
+	 * @param args
+	 */
 	public static void main(String[] args) {
 		Main.interpreter();
 
 	}
 
+	/**
+	 * Receives the input command and returns the respective enum
+	 * 
+	 * @param input - where the given details are read
+	 * @return the value of the enum
+	 */
 	private static Command getCommand(Scanner input) {
 		try {
 			return Command.valueOf(input.next().toUpperCase());
@@ -113,6 +131,9 @@ public class Main {
 		}
 	}
 
+	/**
+	 * Command interpreter
+	 */
 	private static void interpreter() {
 		VersionControl vc = new VersionControlClass();
 		Scanner input = new Scanner(System.in);
@@ -173,12 +194,22 @@ public class Main {
 		input.close();
 	}
 
+	/**
+	 * Lists all command options
+	 */
 	private static void helpCommand() {
 		System.out.printf(HELP_INFO + HELP_1 + HELP_2 + HELP_3 + HELP_4 + HELP_5 + HELP_6 + HELP_7 + HELP_8 + HELP_9
 				+ HELP_10 + HELP_11 + HELP_12 + HELP_13 + HELP_14 + HELP_15);
 
 	}
 
+	/**
+	 * Regists a new user that can either be a manager or a developer. It succeeds
+	 * if the user do not exits, the manager exits and if the job position is known
+	 * 
+	 * @param input - where the given details are read
+	 * @param vc    - the VersionControl
+	 */
 	private static void registerCommand(Scanner input, VersionControl vc) {
 		String jobPosition = input.next();
 		String username = input.next();
@@ -200,6 +231,12 @@ public class Main {
 		}
 	}
 
+	/**
+	 * Lists all registed users, managers and user. It succeeds if at least one user
+	 * is registed
+	 * 
+	 * @param vc - the VersionControl
+	 */
 	private static void listUsers(VersionControl vc) {
 		try {
 			Iterator<User> it = vc.listAllUsers();
@@ -226,6 +263,14 @@ public class Main {
 
 	}
 
+	/**
+	 * Creates a new project. It succeeds if the job position is known, the manager
+	 * exists, if the project has not already created and the clearence level of the
+	 * manager is not higher than the level of the manager
+	 * 
+	 * @param input - where the given details are read
+	 * @param vc    - the VersionControl
+	 */
 	private static void createProject(Scanner input, VersionControl vc) {
 		String username = input.next();
 		String projectType = input.next();
@@ -253,6 +298,11 @@ public class Main {
 		}
 	}
 
+	/**
+	 * Lists all the projects created, if at least one project has added
+	 * 
+	 * @param vc - the VersionControl
+	 */
 	private static void listProjects(VersionControl vc) {
 		try {
 			Iterator<Project> it = vc.listAllProjects();
@@ -280,6 +330,13 @@ public class Main {
 		}
 	}
 
+	/**
+	 * Adds team members to a project, if the manager exists, the project exists and
+	 * the project is managed by the given manager
+	 * 
+	 * @param input - where the given details are read
+	 * @param vc    - the VersionControl
+	 */
 	private static void addTeam(Scanner input, VersionControl vc) {
 		ArrayList<String> members = new ArrayList<String>();
 		String username = input.next();
@@ -318,6 +375,13 @@ public class Main {
 		}
 	}
 
+	/**
+	 * Adds a new artefact to the project, if the user exists, the project exists
+	 * and the user is a member of the project team
+	 * 
+	 * @param input - where the given details are read
+	 * @param vc    - the VersionControl
+	 */
 	private static void addArtefacts(Scanner input, VersionControl vc) {
 		ArrayList<String> artefactsNames = new ArrayList<String>();
 		ArrayList<Integer> artefactsLevels = new ArrayList<Integer>();
@@ -370,11 +434,18 @@ public class Main {
 		}
 	}
 
+	/**
+	 * Lists the information of a received project, if this project exists and its a
+	 * in-house project
+	 * 
+	 * @param input - where the given details are read
+	 * @param vc    - the VersionControl
+	 */
 	private static void listProjectDetails(Scanner input, VersionControl vc) {
 		String projectName = input.nextLine().trim();
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern(WRITE_DATE_FORMAT);
 		try {
-			vc.projectDetailsExceptions(projectName); // ou no metodo listProjectMembers
+			vc.projectDetailsExceptions(projectName);
 			System.out.println(projectName + SQUARE_BRACKETS1 + vc.getInfoOfProjectInHouse(projectName).getLevel()
 					+ SQUARE_BRACKETS2 + MANAGED_BY2 + BREAK + vc.getInfoOfProject(projectName).getUsername()
 					+ SQUARE_BRACKETS1 + vc.getInfoOfUser(vc.getInfoOfProject(projectName).getUsername()).getLevel()
@@ -407,6 +478,13 @@ public class Main {
 		}
 	}
 
+	/**
+	 * Create a new revision of a artefact, if the user, the project and the
+	 * artefact exists, and the user is a member of the project team
+	 * 
+	 * @param input - where the given details are read
+	 * @param vc    - the VersionControl
+	 */
 	private static void addRevision(Scanner input, VersionControl vc) {
 		String username = input.next();
 		String projectName = input.nextLine().trim();
@@ -414,8 +492,8 @@ public class Main {
 		String date = input.next();
 		String comment = input.nextLine().trim();
 
-		DateTimeFormatter formatter = DateTimeFormatter.ofPattern(WRITE_DATE_FORMAT); // passar para LocalDate
-		LocalDate realDate = LocalDate.parse(date, formatter);
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern(WRITE_DATE_FORMAT);
+		LocalDate realDate = LocalDate.parse(date, formatter); // String to LocalDate format
 
 		try {
 			vc.addRevision(username, projectName, artefactName, realDate, comment);
@@ -434,11 +512,17 @@ public class Main {
 		}
 	}
 
+	/**
+	 * Lists the information of the received developer, if the manager exists
+	 * 
+	 * @param input - where the given details are read
+	 * @param vc    - the VersionControl
+	 */
 	private static void listDevInfo(Scanner input, VersionControl vc) {
 		String managerName = input.next();
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern(WRITE_DATE_FORMAT);
 		try {
-			Iterator<String> itDevNames = vc.listDevOfMan(managerName); // ou fazer um metodo auxiliar
+			Iterator<String> itDevNames = vc.listDevOfMan(managerName);
 			System.out.println(MANAGER_INFO3 + managerName + TWO_POINTS);
 			while (itDevNames.hasNext()) {
 				String devName = itDevNames.next();
@@ -457,6 +541,13 @@ public class Main {
 		}
 	}
 
+	/**
+	 * Lists the projects information by a received keyword, if at least a project
+	 * has the keyword
+	 * 
+	 * @param input - where the given details are read
+	 * @param vc    - the VersionControl
+	 */
 	private static void listKeyword(Scanner input, VersionControl vc) {
 		String keyword = input.nextLine().trim();
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern(WRITE_DATE_FORMAT);
@@ -472,7 +563,7 @@ public class Main {
 							+ inHouse.getNrArtefacts() + COMMA + inHouse.getNrRevisions() + COMMA
 							+ formatter.format(inHouse.getLastRevision()) + SQUARE_BRACKETS2);
 				} else {
-					OutSourced outSourced=(OutSourced) project;
+					OutSourced outSourced = (OutSourced) project;
 					System.out.println(OUTSOURCED_INFO + BREAK + project.getProjectName() + MANAGED_BY1
 							+ project.getUsername() + DEV_BY + outSourced.getCompanyName());
 				}
@@ -482,6 +573,13 @@ public class Main {
 		}
 	}
 
+	/**
+	 * List the projects info by them confidentiality level, if at least one project
+	 * is between the given limits
+	 * 
+	 * @param input - where the given details are read
+	 * @param vc    - the VersionControl
+	 */
 	private static void listByConfidentiality(Scanner input, VersionControl vc) {
 		int limit1 = input.nextInt();
 		int limit2 = input.nextInt();
@@ -524,6 +622,12 @@ public class Main {
 		}
 	}
 
+	/**
+	 * List the 3 users with more artefacts updated, if at least one user updated a
+	 * artefact
+	 * 
+	 * @param vc - the VersionControl
+	 */
 	private static void listWorkaholics(VersionControl vc) {
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern(WRITE_DATE_FORMAT);
 		try {
@@ -539,12 +643,18 @@ public class Main {
 		}
 	}
 
+	/**
+	 * List the two users with more common projects, if at least two users have 1
+	 * project in common
+	 * 
+	 * @param vc - the VersionControl
+	 */
 	private static void listCommon(VersionControl vc) {
 		try {
 			Iterator<String> itCommon = vc.listCommonUser();
-			String user1=itCommon.next();
-			String user2=itCommon.next();
-			System.out.println(user1 +" "+ user2+ " have " + vc.maxNumberCommon()+" projects in common.");
+			String user1 = itCommon.next();
+			String user2 = itCommon.next();
+			System.out.println(user1 + " " + user2 + " have " + vc.maxNumberCommon() + " projects in common.");
 		} catch (NoCommonProjectsException e) {
 			System.out.println("Cannot determine employees with common projects.");
 		}

@@ -47,13 +47,16 @@ public class RevisionClass implements Revision {
 		return date;
 	}
 
-	public int compareTo(Revision r) {
-		int comparacao = this.getDate().compareTo(r.getDate());
-		if (comparacao == 0) {
-			return this.getUsername().compareTo(r.getUsername());
+	/**
+     * Returns the compared RevisionNames of two different revisions.
+     */
+    public int compareTo(Revision r) {
+        int comparacao = this.getDate().compareTo(r.getDate());
+        if (comparacao == 0) {
+            return this.getUsername().compareTo(r.getUsername());
 
-		}
-		return comparacao;
-	}
+        }
+        return comparacao;
+    }
 
 }

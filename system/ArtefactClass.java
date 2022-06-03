@@ -44,25 +44,28 @@ public class ArtefactClass implements Artefact {
 		return olderRevisionDate;
 	}
 
-	public int compareTo(Artefact o) {
-		return this.getArtefactName().compareTo(o.getArtefactName());
-	}
-
 	public int getRevisionsNumberInArtefact() {
 		return revisions.size();
 	}
 
 	public void addRevision(String username, String projectName, String artefactName, LocalDate date, String comment) {
-		Revision newRevision = new RevisionClass(username,projectName, artefactName, date, comment, revisions.size()+1);
+		Revision newRevision = new RevisionClass(username, projectName, artefactName, date, comment,
+				revisions.size() + 1);
 		if (date.isAfter(olderRevisionDate)) {
 			olderRevisionDate = date;
 		}
 		revisions.add(newRevision);
-
 	}
 
 	public Iterator<Revision> listRevisionsByDate() {
 		return revisions.iterator();
+	}
+
+	/**
+	 * Returns the two compare between two different Artefacts.
+	 */
+	public int compareTo(Artefact o) {
+		return this.getArtefactName().compareTo(o.getArtefactName());
 	}
 
 }

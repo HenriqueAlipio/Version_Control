@@ -20,14 +20,51 @@ public class VersionControlClass implements VersionControl {
 		this.maxCommon = 0;
 	}
 
+	public int maxNumberCommon() {
+		return maxCommon;
+	}
+
+	/**
+	 * 
+	 * @param job - job type
+	 * @return true if the job is manager, false if not
+	 */
 	private boolean isManager(String job) {
 		return job.equals(MANAGER);
 	}
 
+	/**
+	 * 
+	 * @param job - job type
+	 * @return true if the job is developer, false if not
+	 */
 	private boolean isDeveloper(String job) {
 		return job.equals(DEVELOPER);
 	}
 
+	/**
+	 * 
+	 * @param type - project type
+	 * @return true if the project type is in-house, false if not
+	 */
+	private boolean isInHouse(String type) {
+		return type.equals(IN_HOUSE);
+	}
+
+	/**
+	 * 
+	 * @param type - project type
+	 * @return true if the project type is outsourced, false if not
+	 */
+	private boolean isOutsourced(String type) {
+		return type.equals(OUTSOURCED);
+	}
+
+	/**
+	 * 
+	 * @param managerName - name of manager
+	 * @return the Manager object 
+	 */
 	private Manager getInfoOfMan(String managerName) {
 		return (Manager) users.get(managerName);
 
@@ -35,6 +72,18 @@ public class VersionControlClass implements VersionControl {
 
 	public User getInfoOfUser(String user) {
 		return users.get(user);
+	}
+
+	public InHouse getInfoOfProjectInHouse(String projectName) {
+		return (InHouse) projects.get(projectName);
+	}
+
+	public Project getInfoOfProject(String projectName) {
+		return projects.get(projectName);
+	}
+
+	public Artefact getInfoOfArtefact(String projectName, String artefactName) {
+		return getInfoOfProjectInHouse(projectName).getInfoOfArtefact(artefactName);
 	}
 
 	public void registUser(String jobPosition, String username, String managerName, int level)
@@ -62,29 +111,6 @@ public class VersionControlClass implements VersionControl {
 			users.put(username, newUser);
 		}
 
-	}
-
-	public Iterator<User> listAllUsers() throws NoUserRegistedException {
-		if (users.size() == 0) {
-			throw new NoUserRegistedException();
-		}
-		return users.values().iterator();
-	}
-
-	private boolean isInHouse(String type) {
-		return type.equals(IN_HOUSE);
-	}
-
-	private boolean isOutsourced(String type) {
-		return type.equals(OUTSOURCED);
-	}
-
-	public InHouse getInfoOfProjectInHouse(String projectName) {
-		return (InHouse) projects.get(projectName);
-	}
-
-	public Project getInfoOfProject(String projectName) {
-		return projects.get(projectName);
 	}
 
 	public void addProject(String username, String projectType, String projectName, int value, String keywords,
@@ -118,26 +144,6 @@ public class VersionControlClass implements VersionControl {
 		}
 	}
 
-	public Iterator<Project> listAllProjects() throws NoProjectAddedException {
-		if (projects.size() == 0) {
-			throw new NoProjectAddedException();
-		}
-		return projects.values().iterator();
-	}
-
-	public void teamExceptions(String username, String projectName)
-			throws ManagerDoesNotExistException, ProjectDoesNotExistException, ProjectIsNotManagedByUserException {
-		if (!projects.containsKey(projectName) || getInfoOfProject(projectName) instanceof OutSourced) {
-			throw new ProjectDoesNotExistException();
-		}
-		if (!users.containsKey(username) || getInfoOfUser(username) instanceof Developer) {
-			throw new ManagerDoesNotExistException();
-		}
-		if (!getInfoOfProject(projectName).getUsername().equals(username)) {
-			throw new ProjectIsNotManagedByUserException();
-		}
-	}
-
 	public void addTeamMembers(String username, String projectName, String member)
 			throws UserDoesNotExistException, InsuficientClarenceLevelException, UserAlreadyAMemberException {
 		if (!users.containsKey(member)) {
@@ -155,8 +161,41 @@ public class VersionControlClass implements VersionControl {
 
 	}
 
-	public Artefact getInfoOfArtefact(String projectName, String artefactName) {
-		return getInfoOfProjectInHouse(projectName).getInfoOfArtefact(artefactName);
+	public void addArtefacts(String username, String projectName, LocalDate realDate, String artefactName, int level,
+			String description) throws ExceedsClarenceLevelException, ArtefactAlreadyInProjectException {
+		if (getInfoOfProjectInHouse(projectName).hasArtefact(artefactName)) {
+			throw new ArtefactAlreadyInProjectException();
+		}
+		if (getInfoOfProjectInHouse(projectName).getLevel() < level) {
+			throw new ExceedsClarenceLevelException();
+		}
+		Artefact newArtefact = new ArtefactClass(username, artefactName, level, description, realDate);
+		getInfoOfProjectInHouse(projectName).addArtefact(newArtefact);
+		getInfoOfArtefact(projectName, artefactName).addRevision(username, projectName, artefactName, realDate,
+				description);
+		getInfoOfUser(username).addRevision(username, projectName, artefactName, realDate, description, 1);
+	}
+
+	public void addRevision(String username, String projectName, String artefactName, LocalDate date, String comment)
+			throws UserDoesNotExistsException, ProjectDoesNotExistException, ArtefactDoesNotExistInProjectException,
+			UserIsNotAMemberException {
+		if (!users.containsKey(username)) {
+			throw new UserDoesNotExistsException();
+		}
+		if (!projects.containsKey(projectName) || getInfoOfProject(projectName) instanceof OutSourced) {
+			throw new ProjectDoesNotExistException();
+		}
+		if (!getInfoOfProjectInHouse(projectName).hasArtefact(artefactName)) {
+			throw new ArtefactDoesNotExistInProjectException();
+		}
+		if (!getInfoOfProjectInHouse(projectName).isAMember(users.get(username))
+				&& !projects.get(projectName).getUsername().equals(username)) {
+			throw new UserIsNotAMemberException();
+		}
+		getInfoOfUser(username).addRevision(username, projectName, artefactName, date, comment,
+				getInfoOfArtefact(projectName, artefactName).getRevisionsNumberInArtefact() + 1);
+		getInfoOfProjectInHouse(projectName).addRevision(username, projectName, artefactName, date, comment);
+		getInfoOfArtefact(projectName, artefactName).addRevision(username, projectName, artefactName, date, comment);
 	}
 
 	public void artefatcsExceptions(String username, String projectName)
@@ -173,19 +212,17 @@ public class VersionControlClass implements VersionControl {
 		}
 	}
 
-	public void addArtefacts(String username, String projectName, LocalDate realDate, String artefactName, int level,
-			String description) throws ExceedsClarenceLevelException, ArtefactAlreadyInProjectException {
-		if (getInfoOfProjectInHouse(projectName).hasArtefact(artefactName)) {
-			throw new ArtefactAlreadyInProjectException();
+	public void teamExceptions(String username, String projectName)
+			throws ManagerDoesNotExistException, ProjectDoesNotExistException, ProjectIsNotManagedByUserException {
+		if (!projects.containsKey(projectName) || getInfoOfProject(projectName) instanceof OutSourced) {
+			throw new ProjectDoesNotExistException();
 		}
-		if (getInfoOfProjectInHouse(projectName).getLevel() < level) {
-			throw new ExceedsClarenceLevelException();
+		if (!users.containsKey(username) || getInfoOfUser(username) instanceof Developer) {
+			throw new ManagerDoesNotExistException();
 		}
-		Artefact newArtefact = new ArtefactClass(username, artefactName, level, description, realDate);
-		getInfoOfProjectInHouse(projectName).addArtefact(newArtefact);
-		getInfoOfArtefact(projectName, artefactName).addRevision(username, projectName, artefactName, realDate,
-				description);
-		getInfoOfUser(username).addRevision(username, projectName, artefactName, realDate, description, 1);
+		if (!getInfoOfProject(projectName).getUsername().equals(username)) {
+			throw new ProjectIsNotManagedByUserException();
+		}
 	}
 
 	public void projectDetailsExceptions(String projectName)
@@ -209,28 +246,6 @@ public class VersionControlClass implements VersionControl {
 
 	public Iterator<Revision> listArtefactRevision(Artefact artefact) {
 		return artefact.listRevisionsByDate();
-	}
-
-	public void addRevision(String username, String projectName, String artefactName, LocalDate date, String comment)
-			throws UserDoesNotExistsException, ProjectDoesNotExistException, ArtefactDoesNotExistInProjectException,
-			UserIsNotAMemberException {
-		if (!users.containsKey(username)) {
-			throw new UserDoesNotExistsException();
-		}
-		if (!projects.containsKey(projectName) || getInfoOfProject(projectName) instanceof OutSourced) {
-			throw new ProjectDoesNotExistException();
-		}
-		if (!getInfoOfProjectInHouse(projectName).hasArtefact(artefactName)) {
-			throw new ArtefactDoesNotExistInProjectException();
-		}
-		if (!getInfoOfProjectInHouse(projectName).isAMember(users.get(username))
-				&& !projects.get(projectName).getUsername().equals(username)) {
-			throw new UserIsNotAMemberException();
-		}
-		getInfoOfUser(username).addRevision(username, projectName, artefactName, date, comment,
-				getInfoOfArtefact(projectName, artefactName).getRevisionsNumberInArtefact() + 1);
-		getInfoOfProjectInHouse(projectName).addRevision(username, projectName, artefactName, date, comment);
-		getInfoOfArtefact(projectName, artefactName).addRevision(username, projectName, artefactName, date, comment);
 	}
 
 	public Iterator<String> listDevOfMan(String managerName) throws ManagerDoesNotExistException {
@@ -316,9 +331,9 @@ public class VersionControlClass implements VersionControl {
 
 	public Iterator<String> listCommonUser() throws NoCommonProjectsException {
 		int common = 0;
-		SortedSet<SortedSet<String>> commonUsers = new TreeSet<SortedSet<String>>(new ComparatorByNames());
-		SortedSet<String> lista = new TreeSet<String>();
-		SortedSet<String> lista2 = new TreeSet<String>();
+		SortedSet<SortedSet<String>> commonsCompared = new TreeSet<SortedSet<String>>(new ComparatorByNames());
+		SortedSet<String> common1 = new TreeSet<String>();
+		SortedSet<String> common2 = new TreeSet<String>();
 		ArrayList<User> usersInfo = new ArrayList<User>();
 		usersInfo.addAll(users.values());
 		for (int i = 0; i < usersInfo.size() - 1; i++) {
@@ -328,18 +343,18 @@ public class VersionControlClass implements VersionControl {
 				common = user1.getCommonProjects(user2);
 				if (common > maxCommon) {
 					maxCommon = common;
-					commonUsers.clear();
-					lista.clear();
-					lista.add(user1.getUserName());
-					lista.add(user2.getUserName());
-					commonUsers.add(lista);
+					commonsCompared.clear();
+					common1.clear();
+					common1.add(user1.getUserName());
+					common1.add(user2.getUserName());
+					commonsCompared.add(common1);
 				}
-				if (common == maxCommon && common != 0 && !lista.contains(user1.getUserName())
-						&& !lista.contains(user2.getUserName())) {
-					lista2.add(user1.getUserName());
-					lista2.add(user2.getUserName());
-					commonUsers.add(lista2);
-					
+				if (common == maxCommon && common != 0 && !common1.contains(user1.getUserName())
+						&& !common1.contains(user2.getUserName())) {
+					common2.add(user1.getUserName());
+					common2.add(user2.getUserName());
+					commonsCompared.add(common2);
+
 				}
 			}
 		}
@@ -347,11 +362,20 @@ public class VersionControlClass implements VersionControl {
 		if (maxCommon == 0) {
 			throw new NoCommonProjectsException();
 		}
-		return commonUsers.first().iterator();
+		return commonsCompared.first().iterator();
 	}
 
-	public int maxNumberCommon() {
-		return maxCommon;
+	public Iterator<User> listAllUsers() throws NoUserRegistedException {
+		if (users.size() == 0) {
+			throw new NoUserRegistedException();
+		}
+		return users.values().iterator();
 	}
 
+	public Iterator<Project> listAllProjects() throws NoProjectAddedException {
+		if (projects.size() == 0) {
+			throw new NoProjectAddedException();
+		}
+		return projects.values().iterator();
+	}
 }

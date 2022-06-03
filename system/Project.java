@@ -1,14 +1,40 @@
 package system;
 
+/**
+ * A project, with associated common characteristics and actions.
+ * 
+ * @author Henrique Alípio / João Marques
+ *
+ */
 public interface Project extends Comparable<Project> {
-	String getUsername();
+    /**
+     * 
+     * @return name of the user associated.
+     */
+    String getUsername();
 
-	String getType();
+    /**
+     * 
+     * @return type of the project.
+     */
+    String getType();
 
-	String getProjectName();
+    /**
+     * 
+     * @return name of the project.
+     */
+    String getProjectName();
 
-	int getValue();
+    /**
+     * 
+     * @return number of keywords associated.
+     */
+    int getValue();
 
-	String getKeyWords();
+    /**
+     * 
+     * @return keywords associated.
+     */
+    String getKeyWords();
 
 }

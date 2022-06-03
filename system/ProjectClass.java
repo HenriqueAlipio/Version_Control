@@ -32,8 +32,9 @@ public class ProjectClass implements Project {
 		return keywords;
 	}
 
-	
-
+	/**
+	 * Returns the compared ProjectNames of two projects different.
+	 */
 	public int compareTo(Project o) {
 		return this.getProjectName().compareTo(o.getProjectName());
 	}
